@@ -1,0 +1,51 @@
+sql.1
+							select team,count(con)   from (
+							select year-(row_number() over(partition by team order by year)) con, team,year,row_number() over(partition by team order by year) pauxu from t1)
+							t2 group by con,team
+							having count(con)>=3
+ 
+ 
+ 
+ 
+ sql.2
+							select id,time,qian,price,hou,bplv from (
+							select id,time,qian,price,hou,
+								CASE WHEN price>qian and price>hou THEN '波峰'  
+										WHEN price<qian and price<hou THEN '波谷'                                           
+										end bplv
+							from (
+									SELECT id,time,lag(price) OVER(partition by id) qian,price,lead(price) OVER(partition by id) hou
+									FROM   t2 ) tdsa  ) trt
+							where bplv is not null
+  
+  
+  
+
+sql.3
+							select  id,coid , qiuhe from (
+							select id,coid, 
+							(unix_timestamp( last_value( from_unixtime(unix_timestamp(dt,'yyyy/mm/dd hh:mm') ) )over(PARTITION BY id))-
+							unix_timestamp( first_value( from_unixtime(unix_timestamp(dt,'yyyy/mm/dd hh:mm') )) over(PARTITION BY id)))/60 qiuhe   from (
+							SELECT DISTINCT  id,dt,browseid, count(id) over (PARTITION BY id) coid from t3 ) qwe) ppp group by id,coid , qiuhe
+
+
+sql.4
+							SELECT  id,max(from_unixtime(unix_timestamp(dt,'yyyy/mm/dd hh:mm')))-min(from_unixtime(unix_timestamp(dt,'yyyy/mm/dd hh:mm'))) ,count(asd)  from (
+							SELECT dt,id,jiegou,zhaungtai,sum (zhaungtai) OVER(PARTITION BY id  ORDER BY dt) asd from (
+									SELECT dt,id,jiegou,
+									CASE WHEN jiegou<=30 THEN 0
+											WHEN jiegou>=30 THEN 1  
+											end zhaungtai
+									from (
+									SELECT dt,id,unix_timestamp(yuanzhi),unix_timestamp(weiyi),(unix_timestamp(yuanzhi)-unix_timestamp(weiyi))/60 jiegou
+									from (
+									SELECT dt,id,from_unixtime(unix_timestamp(dt,'yyyy/mm/dd hh:mm')) yuanzhi,
+									from_unixtime(unix_timestamp(xl,'yyyy/mm/dd hh:mm')) weiyi
+									from (
+									SELECT id,dt,lag(dt) OVER(PARTITION BY id ORDER BY dt) xl from t3 GROUP BY id,dt ORDER BY dt ) t0) tp )pp
+									) ls
+									) ppppp  GROUP BY id,asd HAVING asd is NOT NULL
+							
+
+ 
+ 
